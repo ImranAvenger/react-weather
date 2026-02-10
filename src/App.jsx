@@ -1,35 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import { getWeather } from "./services/weatherApi";
+import CurrentWeather from "./components/CurrentWeather";
+import HourlyForecast from "./components/HourlyForecast";
+import DailyForecast from "./components/DailyForecast";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    getWeather(23.71, 90.41) // Dhaka
+      .then(data => {
+        setWeather(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p>লোড হচ্ছে...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>🌦️ Weather App</h1>
+      <CurrentWeather hourly={weather.hourly} />
+      <HourlyForecast hourly={weather.hourly} />
+      <DailyForecast daily={weather.daily} />
+    </div>
+  );
 }
 
-export default App
+export default App;
